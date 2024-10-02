@@ -1,0 +1,30 @@
+services:
+  open-ldap:
+    image: osixia/openldap:1.5.0
+    hostname: openldap
+    command: --copy-service
+    environment:
+      LDAP_ORGANISATION: "Bitwarden"
+      LDAP_DOMAIN: "bitwarden.com"
+      LDAP_TLS_VERIFY_CLIENT: "try" # do not require a certificate from the client. The default is "demand"
+    volumes:
+      - ./directory.ldif:/container/service/slapd/assets/config/bootstrap/ldif/output.ldif
+    ports:
+      - "127.0.0.1:1389:389"
+      - "127.0.0.1:1636:636"
+    profiles:
+      - all
+      - server
+
+  ldap-admin:
+    image: osixia/phpldapadmin:0.9.0
+    environment:
+      - PHPLDAPADMIN_HTTPS=false
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - LDAP_PORT_NUMBER=389
+      - LDAP_LDAPS_PORT_NUMBER=636
+    ports:
+      - "127.0.0.1:6080:80"
+    profiles:
+      - all
+      - admin
